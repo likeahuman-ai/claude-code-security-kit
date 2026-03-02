@@ -1,8 +1,8 @@
 # Claude Code Security Kit
 
-Stop blindly installing repos. Audit them first.
+Stop blindly installing repos, agents, skills, and MCP servers. Audit them first.
 
-This kit adds a security layer to Claude Code that automatically blocks `git clone` and forces a full security audit before any external code touches your machine.
+This kit adds a security layer to Claude Code that automatically blocks any command that brings external code onto your machine — and forces a full security audit before it runs.
 
 ## What's inside
 
@@ -15,13 +15,31 @@ This kit adds a security layer to Claude Code that automatically blocks `git clo
 
 ## How it works
 
-1. You (or Claude) tries to `git clone` a repo
+1. You (or Claude) tries to run a risky command (see below)
 2. The hook blocks it
-3. The repo gets cloned to `/tmp/` for inspection
+3. The code gets cloned/downloaded to `/tmp/` for inspection
 4. The security auditor agent runs a full scan (14 categories, 50+ checks)
 5. It searches the web for latest CVEs about that repo first
 6. You get a verdict: **SAFE** / **CAUTION** / **DO NOT INSTALL**
 7. You decide whether to proceed
+
+## What gets blocked
+
+The hook intercepts any command that brings external code onto your machine:
+
+| Category | Commands |
+|----------|----------|
+| Git | `git clone`, `git pull`, `git submodule update/init/add` |
+| Package managers | `npm/pnpm/yarn/bun install` from URLs |
+| Execute-on-download | `npx`, `bunx` (downloads and runs packages) |
+| Piped scripts | `curl \| bash`, `wget \| sh`, etc. |
+| Other languages | `pip install` from URLs, `go install`, `cargo install` |
+| Agent/skill installs | `cp`/`mv` into `~/.claude/agents/` or `~/.claude/skills/` |
+| Hook installs | `cp`/`mv` into `~/.claude/hooks/` |
+| Config modifications | Writing to `.mcp.json`, `~/.claude/settings.json` |
+| Downloading agents | `curl`/`wget` targeting agent/skill `.md` files |
+
+Safe commands like `git status`, `git diff`, `npm run`, `node script.js` are **not** blocked.
 
 ## What it catches
 
