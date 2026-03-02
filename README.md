@@ -8,9 +8,10 @@ This kit adds a security layer to Claude Code that automatically blocks `git clo
 
 | File | What it does |
 |------|-------------|
+| `setup.sh` | One-command installer — copies files and registers the hook |
 | `repo-security-auditor.md` | Custom agent that performs deep security audits across 14 attack categories |
 | `check-repo-before-install.sh` | Hook that blocks `git clone` and triggers the audit flow |
-| `INSTALL.md` | Step-by-step setup guide |
+| `INSTALL.md` | Manual setup guide |
 
 ## How it works
 
@@ -41,36 +42,22 @@ This kit adds a security layer to Claude Code that automatically blocks `git clo
 | 13 | Indirect prompt injection | Hidden instructions in comments, README, API responses |
 | 14 | OWASP Top 10 | Injection, XSS, broken auth, sensitive data exposure, misconfig |
 
-## Quick install
+## Install
 
 ```bash
-# 1. Clone this repo
 git clone https://github.com/likeahuman-ai/claude-code-security-kit.git
-
-# 2. Copy agent + hook
-mkdir -p ~/.claude/agents ~/.claude/hooks
-cp claude-code-security-kit/repo-security-auditor.md ~/.claude/agents/
-cp claude-code-security-kit/check-repo-before-install.sh ~/.claude/hooks/
-chmod +x ~/.claude/hooks/check-repo-before-install.sh
-
-# 3. Add hook to settings.json
+cd claude-code-security-kit
+./setup.sh
 ```
 
-Add this to your `~/.claude/settings.json` inside `"hooks"` > `"PreToolUse"`:
+That's it. The setup script:
+1. Copies the agent to `~/.claude/agents/`
+2. Copies the hook to `~/.claude/hooks/`
+3. Registers the hook in `~/.claude/settings.json` (merges with your existing config)
 
-```json
-{
-  "matcher": "Bash",
-  "hooks": [
-    {
-      "type": "command",
-      "command": "~/.claude/hooks/check-repo-before-install.sh"
-    }
-  ]
-}
-```
+Requires `jq` for auto-registration (`brew install jq` on macOS).
 
-See [INSTALL.md](INSTALL.md) for the full guide.
+See [INSTALL.md](INSTALL.md) for manual setup.
 
 ## Example output
 
